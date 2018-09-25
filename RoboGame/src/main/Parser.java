@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.regex.*;
 import javax.swing.JFileChooser;
 
-import nodes.RobotProgramNode;
+import nodes.*;
 
 /**
  * The parser and interpreter. The top level parse function, a main method for
@@ -90,9 +90,10 @@ public class Parser {
 	 * PROG ::= STMT+
 	 */
 	static RobotProgramNode parseProgram(Scanner s) {
-		return null;
 		// THE PARSER GOES HERE
-		
+		ProgNode program = new ProgNode();
+		program.parse(s);
+		return program;
 	}
 
 	// utility methods for the parser

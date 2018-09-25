@@ -1,5 +1,7 @@
 package nodes;
 
+import java.util.Scanner;
+
 import main.Robot;
 
 public class StmtNode implements RobotProgramNode {
@@ -19,6 +21,11 @@ public class StmtNode implements RobotProgramNode {
 		this.loopNode = null;
 		actNotLoop = true;
 	}
+	
+	@Override
+	public StmtNode parse(Scanner s) {
+		return null;		
+	}
 
 	@Override
 	public void execute(Robot robot) {
@@ -27,6 +34,17 @@ public class StmtNode implements RobotProgramNode {
 		} else {
 			loopNode.execute(robot);
 		}
+	}
+	
+	@Override
+	public String toString() {
+		String stmt = "";
+		if (actNotLoop) {
+			stmt += actNode.toString();
+		} else {
+			stmt += loopNode.toString();
+		}
+		return "STMT" + stmt;
 	}
 
 }

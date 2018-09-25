@@ -1,18 +1,44 @@
 package nodes;
 
 import java.io.IOException;
+import java.util.Scanner;
 
 import main.Robot;
 
 public class ActionNode implements RobotProgramNode {
 
+	Terminal action;
+
 	public ActionNode(String s) {
+		action = stringToEnum(s);
+	}
+
+	@Override
+	public ActionNode parse(Scanner s) {
+		return null;
 	}
 
 	@Override
 	public void execute(Robot robot) {
-		// TODO Auto-generated method stub
-
+		switch (action) {
+		case MOVE:
+			robot.move();
+			break;
+		case TAKEFUEL:
+			robot.takeFuel();
+			break;
+		case TURNL:
+			robot.turnLeft();
+			break;
+		case TURNR:
+			robot.turnRight();
+			break;
+		case WAIT:
+			robot.idleWait();
+			break;
+		default:
+			break;
+		}
 	}
 
 	private static enum Terminal {
@@ -39,6 +65,28 @@ public class ActionNode implements RobotProgramNode {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	private String enumToString(Terminal t) {
+		switch (t) {
+		case MOVE:
+			return "move";
+		case TAKEFUEL:
+			return "takeFuel";
+		case TURNL:
+			return "turnL";
+		case TURNR:
+			return "turnR";
+		case WAIT:
+			return "wait";
+		default:
+			return null;
+		}
+	}
+
+	@Override
+	public String toString() {
+		return enumToString(action);
 	}
 
 }
