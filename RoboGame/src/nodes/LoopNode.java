@@ -17,11 +17,6 @@ public class LoopNode implements RobotProgramNode {
 	}
 
 	@Override
-	public LoopNode parse(Scanner s) {
-		return null;		
-	}
-
-	@Override
 	public void execute(Robot robot) {
 		while (true) {
 			blockNode.execute(robot);

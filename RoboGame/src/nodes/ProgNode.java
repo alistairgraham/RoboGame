@@ -1,8 +1,10 @@
 package nodes;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import main.Parser;
 import main.Robot;
 
 public class ProgNode implements RobotProgramNode {
@@ -14,12 +16,7 @@ public class ProgNode implements RobotProgramNode {
 	}
 	
 	public ProgNode() {
-		this.statements = null;
-	}
-	
-	@Override
-	public ProgNode parse(Scanner s) {
-		return null;		
+		this.statements = new ArrayList<StmtNode>();
 	}
 	
 	@Override
@@ -29,8 +26,8 @@ public class ProgNode implements RobotProgramNode {
 		}
 	}
 	
-	public void setStatementList(List<StmtNode> stmts) {
-		this.statements = stmts;
+	public void addStatement(StmtNode stmt) {
+		this.statements.add(stmt);
 	}
 	
 	@Override
@@ -39,7 +36,7 @@ public class ProgNode implements RobotProgramNode {
 		for (int i = 0; i < statements.size(); i++) {
 			stmts += statements.get(i).toString();
 		}
-		return "PROG" + stmts;
+		return "PROG [" + stmts + "]";
 	}
 
 }

@@ -80,20 +80,96 @@ public class Parser {
 
 	// Useful Patterns
 
-	static Pattern NUMPAT = Pattern.compile("-?\\d+"); // ("-?(0|[1-9][0-9]*)");
-	static Pattern OPENPAREN = Pattern.compile("\\(");
-	static Pattern CLOSEPAREN = Pattern.compile("\\)");
-	static Pattern OPENBRACE = Pattern.compile("\\{");
-	static Pattern CLOSEBRACE = Pattern.compile("\\}");
+	public static Pattern NUMPAT = Pattern.compile("-?\\d+"); // ("-?(0|[1-9][0-9]*)");
+	public static Pattern OPENPAREN = Pattern.compile("\\(");
+	public static Pattern CLOSEPAREN = Pattern.compile("\\)");
+	public static Pattern OPENBRACE = Pattern.compile("\\{");
+	public static Pattern CLOSEBRACE = Pattern.compile("\\}");
+	public static Pattern SEMICOLON = Pattern.compile("\\;");
+	public static Pattern STMT = Pattern.compile("move|turnL|turnR|takeFuel|wait|loop");
+	public static Pattern ACTION = Pattern.compile("move|turnL|turnR|takeFuel|wait");
+	public static Pattern LOOP = Pattern.compile("loop");
+	public static Pattern MOVE = Pattern.compile("move");
+	public static Pattern TURNL = Pattern.compile("turnL");
+	public static Pattern TURNR = Pattern.compile("turnR");
+	public static Pattern TAKEFUEL = Pattern.compile("takeFuel");
+	public static Pattern WAIT = Pattern.compile("wait");
 
 	/**
 	 * PROG ::= STMT+
 	 */
 	static RobotProgramNode parseProgram(Scanner s) {
-		// THE PARSER GOES HERE
+		if (!s.hasNext()) {
+			Parser.fail("Empty program", s);
+		}
+
 		ProgNode program = new ProgNode();
-		program.parse(s);
+
+		while (s.hasNext()) {
+			program.addStatement(parseStmt(s));
+		}
+
 		return program;
+	}
+
+	static StmtNode parseStmt(Scanner s) {
+		StmtNode stmt = null;
+
+		if (s.hasNext(ACTION)) {
+			stmt = new StmtNode(parseActionNode(s));
+		} else if (s.hasNext(LOOP)) {
+			stmt = new StmtNode(parseLoopNode(s));
+		} else {
+			fail("Not a statement", s);
+		}
+
+		return stmt;
+	}
+
+	static ActionNode parseActionNode(Scanner s) {
+		ActionNode actionNode = null;
+		
+		if (s.hasNext("move")) {
+			actionNode = new ActionNode("move");
+		} else if (s.hasNext("turnL")) {
+			actionNode = new ActionNode("turnL");
+		} else if (s.hasNext("turnR")) {
+			actionNode = new ActionNode("turnR");
+		} else if (s.hasNext("takeFuel")) {
+			actionNode = new ActionNode("takeFuel");
+		} else if (s.hasNext("wait")) {
+			actionNode = new ActionNode("wait");
+		} else {
+			fail("Not an action", s);
+		}
+		require(ACTION, "Not an action", s);
+		require(SEMICOLON, "Not a semicolon", s);
+
+		return actionNode;
+	}
+
+	static LoopNode parseLoopNode(Scanner s) {
+		LoopNode loopNode = null;
+		
+		require(LOOP, "Requires a loop", s);
+		loopNode = new LoopNode(parseBlockNode(s));
+		
+		return loopNode;
+	}
+	
+	static BlockNode parseBlockNode(Scanner s) {
+		BlockNode blockNode = new BlockNode();
+		
+		require(OPENBRACE, "Requires an open brace for loop", s);
+		if (!s.hasNext(STMT)) {
+			fail("Not a statement", s);
+		}
+		while (!s.hasNext(CLOSEBRACE)) {
+			blockNode.addStatement(parseStmt(s));
+		}
+		require(CLOSEBRACE, "Requires an close brace for loop", s);
+		
+		return blockNode;
 	}
 
 	// utility methods for the parser
@@ -101,7 +177,7 @@ public class Parser {
 	/**
 	 * Report a failure in the parser.
 	 */
-	static void fail(String message, Scanner s) {
+	public static void fail(String message, Scanner s) {
 		String msg = message + "\n   @ ...";
 		for (int i = 0; i < 5 && s.hasNext(); i++) {
 			msg += " " + s.next();
@@ -110,9 +186,8 @@ public class Parser {
 	}
 
 	/**
-	 * Requires that the next token matches a pattern if it matches, it consumes
-	 * and returns the token, if not, it throws an exception with an error
-	 * message
+	 * Requires that the next token matches a pattern if it matches, it consumes and
+	 * returns the token, if not, it throws an exception with an error message
 	 */
 	static String require(String p, String message, Scanner s) {
 		if (s.hasNext(p)) {
@@ -152,9 +227,9 @@ public class Parser {
 	}
 
 	/**
-	 * Checks whether the next token in the scanner matches the specified
-	 * pattern, if so, consumes the token and return true. Otherwise returns
-	 * false without consuming anything.
+	 * Checks whether the next token in the scanner matches the specified pattern,
+	 * if so, consumes the token and return true. Otherwise returns false without
+	 * consuming anything.
 	 */
 	static boolean checkFor(String p, Scanner s) {
 		if (s.hasNext(p)) {
@@ -165,7 +240,7 @@ public class Parser {
 		}
 	}
 
-	static boolean checkFor(Pattern p, Scanner s) {
+	public static boolean checkFor(Pattern p, Scanner s) {
 		if (s.hasNext(p)) {
 			s.next();
 			return true;
@@ -176,4 +251,5 @@ public class Parser {
 
 }
 
-// You could add the node classes here, as long as they are not declared public (or private)
+// You could add the node classes here, as long as they are not declared public
+// (or private)

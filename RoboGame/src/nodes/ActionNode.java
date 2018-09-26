@@ -14,11 +14,6 @@ public class ActionNode implements RobotProgramNode {
 	}
 
 	@Override
-	public ActionNode parse(Scanner s) {
-		return null;
-	}
-
-	@Override
 	public void execute(Robot robot) {
 		switch (action) {
 		case MOVE:
@@ -45,7 +40,7 @@ public class ActionNode implements RobotProgramNode {
 		MOVE, TURNL, TURNR, TAKEFUEL, WAIT
 	}
 
-	private Terminal stringToEnum(String s) {
+	public static Terminal stringToEnum(String s) {
 		try {
 			switch (s) {
 			case "move":
@@ -67,7 +62,7 @@ public class ActionNode implements RobotProgramNode {
 		return null;
 	}
 
-	private String enumToString(Terminal t) {
+	private static String enumToString(Terminal t) {
 		switch (t) {
 		case MOVE:
 			return "move";

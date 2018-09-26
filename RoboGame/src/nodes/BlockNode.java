@@ -1,5 +1,6 @@
 package nodes;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -14,12 +15,11 @@ public class BlockNode implements RobotProgramNode {
 	}
 
 	public BlockNode() {
-		this.statements = null;
+		this.statements = new ArrayList<StmtNode>();
 	}
 	
-	@Override
-	public BlockNode parse(Scanner s) {
-		return null;		
+	public void addStatement(StmtNode stmt) {
+		this.statements.add(stmt);
 	}
 
 	@Override

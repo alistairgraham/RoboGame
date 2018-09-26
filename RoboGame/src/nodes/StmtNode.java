@@ -6,9 +6,9 @@ import main.Robot;
 
 public class StmtNode implements RobotProgramNode {
 
-	ActionNode actNode;
-	LoopNode loopNode;
-	boolean actNotLoop;
+	private ActionNode actNode;
+	private LoopNode loopNode;
+	private boolean actNotLoop;
 
 	public StmtNode(LoopNode loopNode) {
 		this.loopNode = loopNode;
@@ -22,9 +22,9 @@ public class StmtNode implements RobotProgramNode {
 		actNotLoop = true;
 	}
 	
-	@Override
-	public StmtNode parse(Scanner s) {
-		return null;		
+	public StmtNode() {
+		this.actNode = null;
+		this.loopNode = null;
 	}
 
 	@Override
