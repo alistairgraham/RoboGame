@@ -1,50 +1,38 @@
 package nodes;
 
-import java.util.Scanner;
-
 import main.Robot;
 
 public class StmtNode implements RobotProgramNode {
 
-	private ActionNode actNode;
-	private LoopNode loopNode;
-	private boolean actNotLoop;
+	private RobotProgramNode statementNode;
 
-	public StmtNode(LoopNode loopNode) {
-		this.loopNode = loopNode;
-		this.actNode = null;
-		actNotLoop = false;
-	}
-
-	public StmtNode(ActionNode actNode) {
-		this.actNode = actNode;
-		this.loopNode = null;
-		actNotLoop = true;
+	public StmtNode() {
+		this.statementNode = null;
 	}
 	
-	public StmtNode() {
-		this.actNode = null;
-		this.loopNode = null;
+	public StmtNode(ActionNode actNode) {
+		this.statementNode = actNode;
+	}
+
+	public StmtNode(LoopNode loopNode) {
+		this.statementNode = loopNode;
+	}
+	
+	public StmtNode(IfNode ifNode) {
+		this.statementNode = ifNode;
+	}
+	
+	public StmtNode(WhileNode whileNode) {
+		this.statementNode = whileNode;
 	}
 
 	@Override
 	public void execute(Robot robot) {
-		if (actNotLoop) {
-			actNode.execute(robot);
-		} else {
-			loopNode.execute(robot);
-		}
+		statementNode.execute(robot);
 	}
-	
-	@Override
-	public String toString() {
-		String stmt = "";
-		if (actNotLoop) {
-			stmt += actNode.toString();
-		} else {
-			stmt += loopNode.toString();
-		}
-		return "STMT" + stmt;
+
+	public String toString(int indents) {
+		return statementNode.toString(indents) + "\n";
 	}
 
 }

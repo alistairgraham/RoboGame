@@ -86,9 +86,16 @@ public class Parser {
 	public static Pattern OPENBRACE = Pattern.compile("\\{");
 	public static Pattern CLOSEBRACE = Pattern.compile("\\}");
 	public static Pattern SEMICOLON = Pattern.compile("\\;");
-	public static Pattern STMT = Pattern.compile("move|turnL|turnR|takeFuel|wait|loop");
-	public static Pattern ACTION = Pattern.compile("move|turnL|turnR|takeFuel|wait");
+	public static Pattern COMMA = Pattern.compile(",");
+	public static Pattern STMT = Pattern
+			.compile("move|turnL|turnR|takeFuel|turnAround|shieldOn|shieldOff|wait|loop|if|while");
+	public static Pattern ACTION = Pattern.compile("move|turnL|turnR|takeFuel|turnAround|shieldOn|shieldOff|wait");
+	public static Pattern RELOP = Pattern.compile("lt|gt|eq");
+	public static Pattern SENSOR = Pattern.compile("fuelLeft|oppLR|oppFB|numBarrels|barrelLR|barrelFB|wallDist");
+	public static Pattern NUM = Pattern.compile("-?[0-9]+");
 	public static Pattern LOOP = Pattern.compile("loop");
+	public static Pattern IF = Pattern.compile("if");
+	public static Pattern WHILE = Pattern.compile("while");
 	public static Pattern MOVE = Pattern.compile("move");
 	public static Pattern TURNL = Pattern.compile("turnL");
 	public static Pattern TURNR = Pattern.compile("turnR");
@@ -119,6 +126,10 @@ public class Parser {
 			stmt = new StmtNode(parseActionNode(s));
 		} else if (s.hasNext(LOOP)) {
 			stmt = new StmtNode(parseLoopNode(s));
+		} else if (s.hasNext(IF)) {
+			stmt = new StmtNode(parseIfNode(s));
+		} else if (s.hasNext(WHILE)) {
+			stmt = new StmtNode(parseWhileNode(s));
 		} else {
 			fail("Not a statement", s);
 		}
@@ -128,21 +139,52 @@ public class Parser {
 
 	static ActionNode parseActionNode(Scanner s) {
 		ActionNode actionNode = null;
-		
-		if (s.hasNext("move")) {
-			actionNode = new ActionNode("move");
-		} else if (s.hasNext("turnL")) {
+
+		String actionType = require(ACTION, "Not an action", s);
+
+		switch (actionType) {
+		case "move":
+			if (s.hasNext(OPENPAREN)) {
+				require(OPENPAREN, "Requires open parentheses", s);
+				int repeat = Integer.valueOf(require(NUMPAT, "Requires a number", s));
+				actionNode = new ActionNode("move", repeat);
+				require(CLOSEPAREN, "Requires close parentheses", s);
+			} else {
+				actionNode = new ActionNode("move", 1);
+			}
+			break;
+		case "turnL":
 			actionNode = new ActionNode("turnL");
-		} else if (s.hasNext("turnR")) {
+			break;
+		case "turnR":
 			actionNode = new ActionNode("turnR");
-		} else if (s.hasNext("takeFuel")) {
+			break;
+		case "takeFuel":
 			actionNode = new ActionNode("takeFuel");
-		} else if (s.hasNext("wait")) {
-			actionNode = new ActionNode("wait");
-		} else {
+			break;
+		case "wait":
+			if (s.hasNext(OPENPAREN)) {
+				require(OPENPAREN, "Requires open parentheses", s);
+				int repeat = Integer.valueOf(require(NUMPAT, "Requires a number", s));
+				actionNode = new ActionNode("wait", repeat);
+				require(CLOSEPAREN, "Requires close parentheses", s);
+			} else {
+				actionNode = new ActionNode("wait");
+			}
+			break;
+		case "turnAround":
+			actionNode = new ActionNode("turnAround");
+			break;
+		case "shieldOn":
+			actionNode = new ActionNode("shieldOn");
+			break;
+		case "shieldOff":
+			actionNode = new ActionNode("shieldOff");
+			break;
+		default:
 			fail("Not an action", s);
 		}
-		require(ACTION, "Not an action", s);
+
 		require(SEMICOLON, "Not a semicolon", s);
 
 		return actionNode;
@@ -150,16 +192,58 @@ public class Parser {
 
 	static LoopNode parseLoopNode(Scanner s) {
 		LoopNode loopNode = null;
-		
+
 		require(LOOP, "Requires a loop", s);
 		loopNode = new LoopNode(parseBlockNode(s));
-		
+
 		return loopNode;
 	}
-	
+
+	static IfNode parseIfNode(Scanner s) {
+		IfNode ifNode = null;
+		require(IF, "Requires an if statement", s);
+		require(OPENPAREN, "Requires open parantheses", s);
+
+		ConditionNode cond = null;
+		cond = parseConditionNode(s);
+
+		require(CLOSEPAREN, "Requires close parantheses", s);
+
+		ifNode = new IfNode(cond, parseBlockNode(s));
+		return ifNode;
+	}
+
+	static WhileNode parseWhileNode(Scanner s) {
+		WhileNode whileNode = null;
+		require(WHILE, "Requires a while statement", s);
+		require(OPENPAREN, "Requires open parantheses", s);
+
+		ConditionNode cond = null;
+		cond = parseConditionNode(s);
+
+		require(CLOSEPAREN, "Requires close parantheses", s);
+
+		whileNode = new WhileNode(cond, parseBlockNode(s));
+		return whileNode;
+	}
+
+	static ConditionNode parseConditionNode(Scanner s) {
+		ConditionNode condNode = null;
+
+		String relop = require(RELOP, "Requires relop", s);
+		require(OPENPAREN, "Requires open parantheses", s);
+		String sen = require(SENSOR, "Requires sensor", s);
+		require(COMMA, "Requires comma", s);
+		int num = Integer.valueOf(require(NUM, "Requires a number", s));
+		require(CLOSEPAREN, "Requires close parantheses", s);
+
+		condNode = new ConditionNode(relop, sen, num);
+		return condNode;
+	}
+
 	static BlockNode parseBlockNode(Scanner s) {
 		BlockNode blockNode = new BlockNode();
-		
+
 		require(OPENBRACE, "Requires an open brace for loop", s);
 		if (!s.hasNext(STMT)) {
 			fail("Not a statement", s);
@@ -168,7 +252,7 @@ public class Parser {
 			blockNode.addStatement(parseStmt(s));
 		}
 		require(CLOSEBRACE, "Requires an close brace for loop", s);
-		
+
 		return blockNode;
 	}
 

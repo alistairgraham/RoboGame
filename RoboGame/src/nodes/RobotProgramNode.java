@@ -8,4 +8,5 @@ import main.Robot;
 
 public interface RobotProgramNode {
 	public void execute(Robot robot);
+	public String toString(int indents);
 }

@@ -27,9 +27,12 @@ public class LoopNode implements RobotProgramNode {
 		this.blockNode = bN;
 	}
 
-	@Override
-	public String toString() {
-		return "loop" + blockNode.toString();
+	public String toString(int indents) {
+		String indentation = "";
+		for (int i=0; i<indents; i++) {
+			indentation += "\t";
+		}
+		return indentation + "loop {\n" + blockNode.toString(indents+1) + "}\n";
 	}
 
 }

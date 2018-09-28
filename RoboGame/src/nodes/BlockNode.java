@@ -30,12 +30,15 @@ public class BlockNode implements RobotProgramNode {
 	}
 
 	@Override
-	public String toString() {
+	public String toString(int indents) {
 		String stmts = "";
 		for (int i = 0; i < statements.size(); i++) {
-			stmts += statements.get(i).toString();
+//			for (int j=0; j<indents; j++) {
+//				stmts += "\t";
+//			}
+			stmts += statements.get(i).toString(indents);
 		}
-		return "BLOCK" + stmts;
+		return stmts;
 	}
 
 	

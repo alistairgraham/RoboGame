@@ -34,9 +34,15 @@ public class ProgNode implements RobotProgramNode {
 	public String toString() {
 		String stmts = "";
 		for (int i = 0; i < statements.size(); i++) {
-			stmts += statements.get(i).toString();
+			stmts += statements.get(i).toString(0);
 		}
-		return "PROG [" + stmts + "]";
+		return stmts;
 	}
+	
+	// Program always has indent 0 so unnecessary
+	public String toString(int indents) {
+		return null;
+	}
+	
 
 }
