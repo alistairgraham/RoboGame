@@ -36,7 +36,13 @@ public class IfNode implements RobotProgramNode {
 		for (int i = 0; i < indents; i++) {
 			indentation += "\t";
 		}
-		return indentation + "if (" + conditionNode.toString() + ") {\n" + ifBlock.toString(indents + 1) + indentation + "}";
+		if (elseBlock == null) {
+			return indentation + "if (" + conditionNode.toString() + ") {\n" + ifBlock.toString(indents + 1) + indentation + "}";
+		}
+		else {
+		return indentation + "if (" + conditionNode.toString() + ") {\n" + ifBlock.toString(indents + 1) + indentation + "} "
+				+ "else " + "{\n" + elseBlock.toString(indents + 1) + indentation + "}";
+		}
 	}
 
 }

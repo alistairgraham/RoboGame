@@ -153,11 +153,11 @@ public class Parser {
 		case "move":
 			if (s.hasNext(OPENPAREN)) {
 				require(OPENPAREN, "Requires open parentheses", s);
-				int repeat = Integer.valueOf(require(NUMPAT, "Requires a number", s));
-				actionNode = new ActionNode("move", repeat);
+				ExpressionNode exp = parseExpressionNode(s);
+				actionNode = new ActionNode("move", exp);
 				require(CLOSEPAREN, "Requires close parentheses", s);
 			} else {
-				actionNode = new ActionNode("move", 1);
+				actionNode = new ActionNode("move");
 			}
 			break;
 		case "turnL":
@@ -172,8 +172,8 @@ public class Parser {
 		case "wait":
 			if (s.hasNext(OPENPAREN)) {
 				require(OPENPAREN, "Requires open parentheses", s);
-				int repeat = Integer.valueOf(require(NUMPAT, "Requires a number", s));
-				actionNode = new ActionNode("wait", repeat);
+				ExpressionNode exp = parseExpressionNode(s);
+				actionNode = new ActionNode("wait", exp);
 				require(CLOSEPAREN, "Requires close parentheses", s);
 			} else {
 				actionNode = new ActionNode("wait");

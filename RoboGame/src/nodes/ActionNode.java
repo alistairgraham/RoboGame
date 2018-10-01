@@ -9,14 +9,14 @@ import main.Robot;
 public class ActionNode implements RobotProgramNode {
 
 	Terminal action;
-	int repeat;
+	ExpressionNode repeat;
 
 	public ActionNode(String s) {
 		action = stringToEnum(s);
-		repeat = 1;
+		repeat = new ExpressionNode(1D);
 	}
 
-	public ActionNode(String s, int repeat) {
+	public ActionNode(String s, ExpressionNode repeat) {
 		action = stringToEnum(s);
 		this.repeat = repeat;
 	}
@@ -26,7 +26,7 @@ public class ActionNode implements RobotProgramNode {
 		try {
 			switch (action) {
 			case MOVE:
-				IntStream.range(0, repeat).forEach(i -> {
+				IntStream.range(0, repeat.evaluate(robot).intValue()).forEach(i -> {
 					robot.move();
 				});
 				break;
@@ -40,7 +40,7 @@ public class ActionNode implements RobotProgramNode {
 				robot.turnRight();
 				break;
 			case WAIT:
-				IntStream.range(0, repeat).forEach(i -> {
+				IntStream.range(0, repeat.evaluate(robot).intValue()).forEach(i -> {
 					robot.idleWait();
 				});
 				break;
