@@ -87,8 +87,8 @@ public class Parser {
 	public static Pattern CLOSEBRACE = Pattern.compile("\\}");
 	public static Pattern SEMICOLON = Pattern.compile("\\;");
 	public static Pattern COMMA = Pattern.compile(",");
-	public static Pattern STMT = Pattern
-			.compile("move|turnL|turnR|takeFuel|turnAround|shieldOn|shieldOff|wait|loop|if|while");
+	public static Pattern STMT = Pattern.compile(
+			"move|turnL|turnR|takeFuel|turnAround|shieldOn|shieldOff|wait|loop|if|while|[?][a-zA-Z_]+[0-9a-zA-Z_]*");
 	public static Pattern ACTION = Pattern.compile("move|turnL|turnR|takeFuel|turnAround|shieldOn|shieldOff|wait");
 	public static Pattern CONDITION = Pattern.compile("and|or|not|lt|gt|eq");
 	public static Pattern ANDOR = Pattern.compile("and|or");
@@ -108,6 +108,8 @@ public class Parser {
 	public static Pattern TURNR = Pattern.compile("turnR");
 	public static Pattern TAKEFUEL = Pattern.compile("takeFuel");
 	public static Pattern WAIT = Pattern.compile("wait");
+	public static Pattern ASSGN = Pattern.compile("[?][a-zA-Z_]+[0-9a-zA-Z_]*");
+	public static Pattern EQUALS = Pattern.compile("=");
 
 	/**
 	 * PROG ::= STMT+
@@ -137,11 +139,21 @@ public class Parser {
 			stmt = new StmtNode(parseIfNode(s));
 		} else if (s.hasNext(WHILE)) {
 			stmt = new StmtNode(parseWhileNode(s));
+		} else if (s.hasNext(ASSGN)) {
+			stmt = new StmtNode(parseAssgnNode(s));
 		} else {
 			fail("Not a statement", s);
 		}
 
 		return stmt;
+	}
+	
+	static AssgnNode parseAssgnNode(Scanner s) {
+		String name = require(ASSGN, "Requires a valid variable name", s);
+		require(EQUALS, "Requires an equal sign", s);
+		ExpressionNode expNode = parseExpressionNode(s);
+		require(SEMICOLON, "Requires semicolon", s);
+		return new AssgnNode(name, expNode);
 	}
 
 	static ActionNode parseActionNode(Scanner s) {
@@ -263,7 +275,7 @@ public class Parser {
 
 			condNode = new ConditionNode(conjunctor, condition);
 		} else if (s.hasNext(RELOP)) {
-			
+
 			String relop = require(RELOP, "Requires relop", s);
 			require(OPENPAREN, "Requires open parantheses", s);
 			ExpressionNode exp1 = parseExpressionNode(s);

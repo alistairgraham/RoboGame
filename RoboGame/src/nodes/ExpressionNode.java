@@ -9,22 +9,34 @@ public class ExpressionNode {
 	private ExpressionType expType;
 	
 	private Sensor sensor;
+	private int specifier;
+	private boolean hasSpecifier;
 	private Double num;
 	private OperationNode operation;
 
 	public ExpressionNode(Double num) {
 		this.num = num;
 		this.expType = ExpressionType.NUM;
+		this.hasSpecifier = false;
 	}
 
 	public ExpressionNode(String sensor) {
 		this.sensor = stringToSensor(sensor);
 		this.expType = ExpressionType.SEN;
+		this.hasSpecifier = false;
+	}
+	
+	public ExpressionNode(String sensor, int specifier) {
+		this.sensor = stringToSensor(sensor);
+		this.specifier = specifier;
+		this.expType = ExpressionType.SEN;
+		this.hasSpecifier = true;
 	}
 
 	public ExpressionNode(OperationNode operation) {
 		this.operation = operation;
 		this.expType = ExpressionType.OP;
+		this.hasSpecifier = false;
 	}
 
 	public Double evaluate(Robot robot) {
@@ -52,8 +64,14 @@ public class ExpressionNode {
 			switch (this.sensor) {
 			case BARRELFB:
 				// not sure about parameter
+				if (hasSpecifier) {
+					return robot.getBarrelFB(specifier);
+				}
 				return robot.getClosestBarrelFB();
 			case BARRELLR:
+				if (hasSpecifier) {
+					return robot.getBarrelLR(specifier);
+				}
 				return robot.getClosestBarrelLR();
 			case FUELLEFT:
 				return robot.getFuel();

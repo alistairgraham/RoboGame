@@ -12,10 +12,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import nodes.ExpressionNode;
 import nodes.RobotProgramNode;
 
 public class Robot {
@@ -23,13 +26,16 @@ public class Robot {
 	// =======================================================
 	// Public methods that can be called by the interpreter:
 	// =======================================================
+	
+	// Fields
+	public Map<String, ExpressionNode> variableMap;
 
 	// Robot Actions
 	// -------------
 
 	/**
 	 * Move forward one step.
-	 */
+	 */	
 	public void move() {
 		debug("move");
 		currentAction = ACTION_MOVE;
@@ -341,6 +347,7 @@ public class Robot {
 	private boolean noWait = false;
 
 	public Robot(World world, int x, int y, String colour, boolean noWait) {
+		this.variableMap = new HashMap<String, ExpressionNode>();
 		this.world = world;
 		this.x = x;
 		this.y = y;

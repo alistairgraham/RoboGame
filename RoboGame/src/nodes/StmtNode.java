@@ -25,6 +25,10 @@ public class StmtNode implements RobotProgramNode {
 	public StmtNode(WhileNode whileNode) {
 		this.statementNode = whileNode;
 	}
+	
+	public StmtNode(AssgnNode assgnNode) {
+		this.statementNode = assgnNode;
+	}
 
 	@Override
 	public void execute(Robot robot) {

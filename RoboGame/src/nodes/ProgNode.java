@@ -2,6 +2,7 @@ package nodes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import main.Parser;
@@ -10,6 +11,7 @@ import main.Robot;
 public class ProgNode implements RobotProgramNode {
 	
 	List<StmtNode> statements;
+	Map<String, Object> variables;
 
 	public ProgNode(List<StmtNode> statements) {
 		this.statements = statements;
@@ -17,6 +19,10 @@ public class ProgNode implements RobotProgramNode {
 	
 	public ProgNode() {
 		this.statements = new ArrayList<StmtNode>();
+	}
+	
+	public void setVariables(Map<String, Object> variableMap) {
+		this.variables = variableMap;
 	}
 	
 	@Override

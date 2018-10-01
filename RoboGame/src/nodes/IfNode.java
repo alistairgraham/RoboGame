@@ -27,7 +27,9 @@ public class IfNode implements RobotProgramNode {
 		if (hasConditionPassed) {
 			ifBlock.execute(robot);
 		} else {
-			elseBlock.execute(robot);
+			if (elseBlock != null) {
+				elseBlock.execute(robot);
+			}
 		}
 	}
 
