@@ -5,28 +5,38 @@ import main.Robot;
 public class IfNode implements RobotProgramNode {
 
 	ConditionNode conditionNode;
-	BlockNode blockNode;
-	
-	public IfNode(ConditionNode conditionNode, BlockNode blockNode) {
+	BlockNode ifBlock;
+	BlockNode elseBlock;
+
+	public IfNode(ConditionNode conditionNode, BlockNode ifBlock) {
 		this.conditionNode = conditionNode;
-		this.blockNode = blockNode;
+		this.ifBlock = ifBlock;
+		this.elseBlock = null;
+	}
+
+	public IfNode(ConditionNode conditionNode, BlockNode ifBlock, BlockNode elseBlock) {
+		this.conditionNode = conditionNode;
+		this.ifBlock = ifBlock;
+		this.elseBlock = elseBlock;
 	}
 
 	@Override
 	public void execute(Robot robot) {
 		boolean hasConditionPassed = conditionNode.evaluate(robot);
-		
+
 		if (hasConditionPassed) {
-			blockNode.execute(robot);
+			ifBlock.execute(robot);
+		} else {
+			elseBlock.execute(robot);
 		}
 	}
-	
+
 	public String toString(int indents) {
 		String indentation = "";
-		for (int i=0; i<indents; i++) {
+		for (int i = 0; i < indents; i++) {
 			indentation += "\t";
 		}
-		return indentation + "if (" + conditionNode.toString() + ") {\n" + blockNode.toString(indents+1) + indentation + "}";
+		return indentation + "if (" + conditionNode.toString() + ") {\n" + ifBlock.toString(indents + 1) + indentation + "}";
 	}
 
 }

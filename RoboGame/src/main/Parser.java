@@ -90,11 +90,18 @@ public class Parser {
 	public static Pattern STMT = Pattern
 			.compile("move|turnL|turnR|takeFuel|turnAround|shieldOn|shieldOff|wait|loop|if|while");
 	public static Pattern ACTION = Pattern.compile("move|turnL|turnR|takeFuel|turnAround|shieldOn|shieldOff|wait");
+	public static Pattern CONDITION = Pattern.compile("and|or|not|lt|gt|eq");
+	public static Pattern ANDOR = Pattern.compile("and|or");
+	public static Pattern NOT = Pattern.compile("not");
 	public static Pattern RELOP = Pattern.compile("lt|gt|eq");
 	public static Pattern SENSOR = Pattern.compile("fuelLeft|oppLR|oppFB|numBarrels|barrelLR|barrelFB|wallDist");
 	public static Pattern NUM = Pattern.compile("-?[0-9]+");
+	public static Pattern EXPRESSION = Pattern
+			.compile("-?[0-9]+|fuelLeft|oppLR|oppFB|numBarrels|barrelLR|barrelFB|wallDist|add|sub|mul|div");
+	public static Pattern OPERATION = Pattern.compile("add|sub|mul|div");
 	public static Pattern LOOP = Pattern.compile("loop");
 	public static Pattern IF = Pattern.compile("if");
+	public static Pattern ELSE = Pattern.compile("else");
 	public static Pattern WHILE = Pattern.compile("while");
 	public static Pattern MOVE = Pattern.compile("move");
 	public static Pattern TURNL = Pattern.compile("turnL");
@@ -201,15 +208,22 @@ public class Parser {
 
 	static IfNode parseIfNode(Scanner s) {
 		IfNode ifNode = null;
+
 		require(IF, "Requires an if statement", s);
 		require(OPENPAREN, "Requires open parantheses", s);
-
 		ConditionNode cond = null;
 		cond = parseConditionNode(s);
-
 		require(CLOSEPAREN, "Requires close parantheses", s);
 
-		ifNode = new IfNode(cond, parseBlockNode(s));
+		BlockNode ifBlock = parseBlockNode(s);
+
+		if (s.hasNext("else")) {
+			require(ELSE, "Requires an else", s);
+			BlockNode elseBlock = parseBlockNode(s);
+			ifNode = new IfNode(cond, ifBlock, elseBlock);
+		} else {
+			ifNode = new IfNode(cond, ifBlock);
+		}
 		return ifNode;
 	}
 
@@ -230,15 +244,64 @@ public class Parser {
 	static ConditionNode parseConditionNode(Scanner s) {
 		ConditionNode condNode = null;
 
-		String relop = require(RELOP, "Requires relop", s);
+		if (s.hasNext(ANDOR)) {
+			String conjunctor = require(ANDOR, "Requires a condition", s);
+
+			require(OPENPAREN, "Requires open parantheses", s);
+			ConditionNode firstCond = parseConditionNode(s);
+			require(COMMA, "Requires comma", s);
+			ConditionNode secondCond = parseConditionNode(s);
+			require(CLOSEPAREN, "Requires close parantheses", s);
+
+			condNode = new ConditionNode(conjunctor, firstCond, secondCond);
+		} else if (s.hasNext(NOT)) {
+			String conjunctor = require(NOT, "Requires a condition", s);
+
+			require(OPENPAREN, "Requires open parantheses", s);
+			ConditionNode condition = parseConditionNode(s);
+			require(CLOSEPAREN, "Requires close parantheses", s);
+
+			condNode = new ConditionNode(conjunctor, condition);
+		} else if (s.hasNext(RELOP)) {
+			
+			String relop = require(RELOP, "Requires relop", s);
+			require(OPENPAREN, "Requires open parantheses", s);
+			ExpressionNode exp1 = parseExpressionNode(s);
+			require(COMMA, "Requires comma", s);
+			ExpressionNode exp2 = parseExpressionNode(s);
+			require(CLOSEPAREN, "Requires close parantheses", s);
+
+			condNode = new ConditionNode(relop, exp1, exp2);
+		} else {
+			fail("Not a condition", s);
+		}
+
+		return condNode;
+	}
+
+	static ExpressionNode parseExpressionNode(Scanner s) {
+		if (s.hasNext(NUM)) {
+			return new ExpressionNode(Double.valueOf(require(NUM, "Requires a num", s)));
+		} else if (s.hasNext(SENSOR)) {
+			return new ExpressionNode(require(SENSOR, "Requires a sensor", s));
+		} else if (s.hasNext(OPERATION)) {
+			return new ExpressionNode(parseOperationNode(s));
+		} else {
+			fail("Not an expression", s);
+			return null;
+		}
+	}
+
+	static OperationNode parseOperationNode(Scanner s) {
+		String operation = require(OPERATION, "Requires an operation", s);
+
 		require(OPENPAREN, "Requires open parantheses", s);
-		String sen = require(SENSOR, "Requires sensor", s);
+		ExpressionNode expNode1 = parseExpressionNode(s);
 		require(COMMA, "Requires comma", s);
-		int num = Integer.valueOf(require(NUM, "Requires a number", s));
+		ExpressionNode expNode2 = parseExpressionNode(s);
 		require(CLOSEPAREN, "Requires close parantheses", s);
 
-		condNode = new ConditionNode(relop, sen, num);
-		return condNode;
+		return new OperationNode(operation, expNode1, expNode2);
 	}
 
 	static BlockNode parseBlockNode(Scanner s) {

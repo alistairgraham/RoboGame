@@ -6,25 +6,61 @@ import main.Robot;
 
 public class ConditionNode {
 
+	String state;
 	private Relop relop;
-	private Sensor sensor;
-	private int num;
+	private String prefix;
+	private ConditionNode condition1;
+	private ConditionNode condition2;
+	private ExpressionNode expression1;
+	private ExpressionNode expression2;
 
-	public ConditionNode(String relop, String sensor, int num) {
+	// Relop
+	public ConditionNode(String relop, ExpressionNode expression1, ExpressionNode expression2) {
 		this.relop = stringToRelop(relop);
-		this.sensor = stringToSensor(sensor);
-		this.num = num;
+		this.expression1 = expression1;
+		this.expression2 = expression2;
+		state = "relop";
+	}
+
+	// And Or
+	public ConditionNode(String prefix, ConditionNode condition1, ConditionNode condition2) {
+		this.prefix = prefix;
+		this.condition1 = condition1;
+		this.condition2 = condition2;
+		state = "andor";
+	}
+
+	// Not
+	public ConditionNode(String prefix, ConditionNode condition) {
+		this.prefix = prefix;
+		this.condition1 = condition;
+		state = "not";
 	}
 
 	public boolean evaluate(Robot robot) {
 		try {
-			switch (relop) {
-			case EQ:
-				return getSensorValue(robot) == num;
-			case GT:
-				return getSensorValue(robot) > num;
-			case LT:
-				return getSensorValue(robot) < num;
+			switch (state) {
+			case "relop":
+				switch (relop) {
+				case LT:
+					return expression1.evaluate(robot) < expression2.evaluate(robot);
+				case EQ:
+					return expression1.evaluate(robot) == expression2.evaluate(robot);
+				case GT:
+					return expression1.evaluate(robot) > expression2.evaluate(robot);
+				}
+			case "andor":
+				switch (prefix) {
+				case "and":
+					return condition1.evaluate(robot) && condition2.evaluate(robot);
+				case "or":
+					return condition1.evaluate(robot) || condition2.evaluate(robot);
+				}
+			case "not":
+				switch (prefix) {
+				case "not":
+					return !condition1.evaluate(robot);
+				}
 			default:
 				throw new IOException();
 			}
@@ -34,39 +70,8 @@ public class ConditionNode {
 		return false;
 	}
 
-	public double getSensorValue(Robot robot) {
-		try {
-			switch (this.sensor) {
-			case BARRELFB:
-				// not sure about parameter
-				return robot.getClosestBarrelFB();
-			case BARRELLR:
-				return robot.getClosestBarrelLR();
-			case FUELLEFT:
-				return robot.getFuel();
-			case NUMBARRELS:
-				return robot.numBarrels();
-			case OPPFB:
-				return robot.getOpponentFB();
-			case OPPLR:
-				return robot.getOpponentLR();
-			case WALLDIST:
-				return robot.getDistanceToWall();
-			default:
-				throw new IOException();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return Integer.MAX_VALUE;
-	}
-
 	public static enum Relop {
 		LT, GT, EQ
-	}
-
-	public static enum Sensor {
-		FUELLEFT, OPPLR, OPPFB, NUMBARRELS, BARRELLR, BARRELFB, WALLDIST
 	}
 
 	private static Relop stringToRelop(String s) {
@@ -105,60 +110,24 @@ public class ConditionNode {
 		return null;
 	}
 
-	private static Sensor stringToSensor(String s) {
-		try {
-			switch (s) {
-			case "fuelLeft":
-				return Sensor.FUELLEFT;
-			case "oppLR":
-				return Sensor.OPPLR;
-			case "oppFB":
-				return Sensor.OPPFB;
-			case "numBarrels":
-				return Sensor.NUMBARRELS;
-			case "barrelLR":
-				return Sensor.BARRELLR;
-			case "barrelFB":
-				return Sensor.BARRELFB;
-			case "wallDist":
-				return Sensor.WALLDIST;
-			default:
-				throw new IOException();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	private static String sensorToString(Sensor sensor) {
-		try {
-			switch (sensor) {
-			case BARRELFB:
-				return "barrelFB";
-			case BARRELLR:
-				return "barrelLR";
-			case FUELLEFT:
-				return "fuelLeft";
-			case NUMBARRELS:
-				return "numBarrels";
-			case OPPFB:
-				return "oppFB";
-			case OPPLR:
-				return "oppLR";
-			case WALLDIST:
-				return "wallDist";
-			default:
-				throw new IOException();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
 	public String toString() {
-		return relopToString(relop) + "(" + sensorToString(sensor) + ", " + String.valueOf(num) + ")";
+		switch (state) {
+		case "relop":
+			return relopToString(relop) + "(" + expression1.toString() + ", " + expression2.toString() + ")";
+		case "andor":
+			switch (prefix) {
+			case "and":
+				return "and(" + condition1.toString() + ", " + condition2.toString() + ")";
+			case "or":
+				return "or(" + condition1.toString() + ", " + condition2.toString() + ")";
+			}
+		case "not":
+			switch (prefix) {
+			case "not":
+				return "not(" + condition1.toString();
+			}
+		}
+		return null;
 	}
 
 }
